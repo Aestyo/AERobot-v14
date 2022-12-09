@@ -11,12 +11,20 @@
     "url": "git+https://github.com/Aestyo/AERobot-v14.git"
   },
   "keywords": [
-    "discord"
+    "discord",
+    "discord bot"
   ],
   "author": "Mathis Sauvage",
   "license": "GPL-3.0",
   "bugs": {
     "url": "https://github.com/Aestyo/AERobot-v14/issues"
   },
-  "homepage": "https://github.com/Aestyo/AERobot-v14#readme"
+  "homepage": "https://github.com/Aestyo/AERobot-v14#readme",
+  "dependencies": {
+    "discord.js": "^14.7.1",
+    "dotenv": "^16.0.3"
+  },
+  "devDependencies": {
+    "eslint": "^8.29.0"
+  }
 }
