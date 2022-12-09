@@ -29,6 +29,7 @@
     "glob": "^8.0.3",
     "http": "^0.0.1-security",
     "jimp": "^0.16.2",
+    "ping": "^0.4.2",
     "promisify": "^0.0.3",
     "webp-converter": "^2.3.3"
   },
