@@ -1,0 +1,50 @@
+[
+    {
+        "id": 1,
+        "name": "Clash of Clans Golem",
+        "x": 170,
+        "y": 60,
+        "scale": 0.15,
+        "flip": false
+    },
+    {
+        "id": 2,
+        "name": "Clash of Clans Frost Golem",
+        "x": 240,
+        "y": 130,
+        "scale": 0.375,
+        "flip": true
+    },
+    {
+        "id": 3,
+        "name": "Minecraft Iron Golem",
+        "x": 70,
+        "y": 2,
+        "scale": 0.2,
+        "flip": false
+    },
+    {
+        "id": 4,
+        "name": "World of Warcraft Stone Golem",
+        "x": 200,
+        "y": 25,
+        "scale": 0.175,
+        "flip": true
+    },
+    {
+        "id": 5,
+        "name": "World of Warcraft Harvest Golem",
+        "x": 125,
+        "y": 25,
+        "scale": 0.1,
+        "flip": false
+    },
+    {
+        "id": 6,
+        "name": "Genshin Impact Ruin Guard",
+        "x": 128,
+        "y": 40,
+        "scale": 0.15,
+        "flip": true
+    }
+]

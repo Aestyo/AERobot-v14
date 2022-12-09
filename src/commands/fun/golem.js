@@ -1,6 +1,8 @@
 const { SlashCommandBuilder, AttachmentBuilder, PermissionFlagsBits } = require('discord.js');
 const avatar = require('../../../utils/avatar');
+const log = require('../../../utils/logger');
 const jimp = require('jimp');
+const fs = require('fs');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -15,63 +17,34 @@ module.exports = {
 	async execute(interaction) {
 		await interaction.deferReply();
 		const target = interaction.options.getMember('target');
-		const image = await GOLEMISATION(target.user);
+		const image = await GenerateGolem(target.user);
 		const attachment = new AttachmentBuilder(`./cache/golem_${target.user.tag}.png`, { name: `${image}.png` });
 		interaction.editReply({ content: 'GROS GOLEM', files: [attachment] });
 	},
 };
 
-async function GOLEMISATION(user) {
+async function GenerateGolem(user) {
 	const golemId = Math.floor(Math.random() * 6 + 1);
+	let x, y, scale, flip;
 
-	let x = 0,
-		y = 0,
-		scale = 1,
-		flip = false;
-
-	switch (golemId) {
-	case 1: {
-		x = 170;
-		y = 60;
-		scale = 0.15;
-		break;
-	}
-	case 2: {
-		x = 240;
-		y = 130;
-		scale = 0.375;
-		flip = true;
-		break;
-	}
-	case 3: {
-		x = 70;
-		y = 2;
-		scale = 0.2;
-		break;
-	}
-	case 4: {
-		x = 200;
-		y = 25;
-		scale = 0.175;
-		flip = true;
-		break;
-	}
-	case 5: {
-		x = 125;
-		y = 25;
-		scale = 0.1;
-		break;
-	}
-	case 6: {
-		x = 128;
-		y = 40;
-		scale = 0.15;
-		flip = true;
-		break;
-	}
-	}
+	fs.readFile('./etc/golems.json', 'utf8', (err, jsonString) => {
+		if (err) {
+			log.error(`Erreur lors de l'ouverture de /etc/golems.json : ${err}`);
+			return;
+		}
+		const data = JSON.parse(jsonString);
+		data.forEach(golem => {
+			if (golem.id == golemId) {
+				x = golem.x;
+				y = golem.y;
+				scale = golem.scale;
+				flip = golem.flip;
+			}
+		});
+	});
 
 	avatar.download(user);
+
 	const images = [`./media/golem/${golemId}.png`, `./cache/avatar_${user.tag}.png`];
 	const jimps = [];
 	images.forEach((img) => {
@@ -82,9 +55,9 @@ async function GOLEMISATION(user) {
 			return Promise.all(jimps);
 		})
 		.then(async function(data) {
-			data[1].scale(scale);
-			data[1].flip(flip, false);
-			data[0].composite(data[1], x, y);
-			data[0].write(`./cache/golem_${user.tag}.png`);
+			await data[1].scale(scale);
+			await data[1].flip(flip, false);
+			await data[0].composite(data[1], x, y);
+			await data[0].write(`./cache/golem_${user.tag}.png`);
 		});
 }
