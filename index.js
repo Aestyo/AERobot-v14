@@ -9,18 +9,17 @@
  * |/     \||_______/|/   \__/|_______||______/ |_______|   |_|
  */
 // Déclaration des modules principaux : discordjs, mongodb
-const { Client, Events, Collection, GatewayIntentBits } = require('discord.js');
+const { Client, Collection, GatewayIntentBits } = require('discord.js');
 
-// Déclaration des modules utilitaires : logger, .env, fs
+// Déclaration des modules utilitaires : logger, .env
 const log = require('./utils/logger.js');
-const fs = require('node:fs');
 const dotenv = require('dotenv');
 
 // Configuration des variables d'environnement et initialisation du logger
 dotenv.config();
 log.init();
 
-// Création de l'instance du client
+// Création de l'instance du client avec ses intentions
 const client = new Client({ intents: [
 	GatewayIntentBits.Guilds,
 	GatewayIntentBits.GuildMessages,
@@ -28,11 +27,13 @@ const client = new Client({ intents: [
 	GatewayIntentBits.GuildMembers,
 ] });
 
+// Génération d'une collection de toutes les commandes et chargement des évènements
+// à l'aides des ./handlers/*.js
 log.info('Chargement des commandes et des évènements');
 ['commands'].forEach((x) => (client[x] = new Collection()));
-['commands'].forEach((handler) => {
+['commands', 'events'].forEach((handler) => {
 	require(`./handlers/${handler}`)(client);
 });
 
-
+// Connexion du client à l'API de Discord
 client.login(process.env.TOKEN_DISCORD);

@@ -1,6 +1,6 @@
 module.exports = {
 	name: 'interactionCreate',
-	async execute(interaction) {
+	async execute(client, interaction) {
 		if (!interaction.isChatInputCommand()) return;
 
 		const command = interaction.client.commands.get(interaction.commandName);
