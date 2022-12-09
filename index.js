@@ -1,40 +1,38 @@
+/**
+ *  _______  _______  _______  _______  ______   _______ _________
+ * |  ___  ||  ____ \|  ____ ||  ___  ||  ___ \ |  ___  |\__   __/
+ * | |   | || |    \/| |    ||| |   | || |   | || |   | |   | |
+ * | |___| || |__    | |____||| |   | || |__/ / | |   | |   | |
+ * |  ___  ||  __|   |     __|| |   | ||  __ |  | |   | |   | |
+ * | |   | || |      | |\ |   | |   | || |  \ \ | |   | |   | |
+ * | |   | || |____/\| | \ \__| |___| || |___\ || |___| |   | |
+ * |/     \||_______/|/   \__/|_______||______/ |_______|   |_|
+ */
+// Déclaration des modules principaux : discordjs, mongodb
 const { Client, Events, Collection, GatewayIntentBits } = require('discord.js');
+
+// Déclaration des modules utilitaires : logger, .env, fs
+const log = require('./utils/logger.js');
 const fs = require('node:fs');
 const dotenv = require('dotenv');
+
+// Configuration des variables d'environnement et initialisation du logger
 dotenv.config();
+log.init();
 
 // Création de l'instance du client
-const client = new Client({ intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMembers ] });
+const client = new Client({ intents: [
+	GatewayIntentBits.Guilds,
+	GatewayIntentBits.GuildMessages,
+	GatewayIntentBits.MessageContent,
+	GatewayIntentBits.GuildMembers,
+] });
 
-// When the client is ready, run this code (only once)
-// We use 'c' for the event parameter to keep it separate from the already defined 'client'
-client.once(Events.ClientReady, c => {
-	console.log(`Ready! Logged in as ${c.user.tag}`);
+log.info('Chargement des commandes et des évènements');
+['commands'].forEach((x) => (client[x] = new Collection()));
+['commands'].forEach((handler) => {
+	require(`./handlers/${handler}`)(client);
 });
 
-client.commands = new Collection();
-const commandFiles = fs.readdirSync('./src/commands').filter(file => file.endsWith('.js'));
 
-for (const file of commandFiles) {
-	const command = require(`./src/commands/${file}`);
-	// Set a new item in the Collection with the key as the command name and the value as the exported module
-	if ('data' in command && 'execute' in command) {
-		client.commands.set(command.data.name, command);
-	} else {
-		console.log(`[WARNING] The command at "./src/commands/${file}" is missing a required "data" or "execute" property.`);
-	}
-}
-
-const eventFiles = fs.readdirSync('./src/events/').filter(file => file.endsWith('.js'));
-
-for (const file of eventFiles) {
-	const event = require(`./src/events/${file}`);
-	if (event.once) {
-		client.once(event.name, (...args) => event.execute(...args));
-	} else {
-		client.on(event.name, (...args) => event.execute(...args));
-	}
-}
-
-// Log in to Discord with your client's token
 client.login(process.env.TOKEN_DISCORD);
