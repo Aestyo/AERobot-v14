@@ -9,6 +9,7 @@ async function Guild(commands) {
 		// try {
 		log.info('Rechargement des commandes locales...');
 
+		console.log(commands);
 		await rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: commands });
 
 		log.success('Les commandes d\'application ont été enregistrées avec succès localement');

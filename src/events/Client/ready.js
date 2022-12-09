@@ -1,6 +1,6 @@
 const log = require('../../../utils/logger');
 const { ActivityType } = require('discord.js');
-const register = require('../../../utils/register');
+// const register = require('../../../utils/register');
 // const waitUntil = require('wait-until');
 
 module.exports = {
@@ -24,7 +24,7 @@ module.exports = {
 		client.user.setActivity(str, { type: ActivityType.Watching });
 
 		// Enregistrement des commandes slash
-		await register.Guild(client.commands.map((cmd) => cmd));
+		// await register.Guild(client.commands.map((cmd) => cmd));
 		// await register.Global(client.commands.map((cmd) => cmd));
 
 		// Fonction de mise en mode "idle"

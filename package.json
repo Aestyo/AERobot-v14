@@ -25,8 +25,12 @@
     "dayjs": "^1.11.7",
     "discord.js": "^14.7.1",
     "dotenv": "^16.0.3",
+    "fs": "^0.0.1-security",
     "glob": "^8.0.3",
-    "promisify": "^0.0.3"
+    "http": "^0.0.1-security",
+    "jimp": "^0.16.2",
+    "promisify": "^0.0.3",
+    "webp-converter": "^2.3.3"
   },
   "devDependencies": {
     "eslint": "^8.29.0"
