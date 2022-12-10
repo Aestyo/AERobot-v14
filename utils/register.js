@@ -16,7 +16,7 @@ async function Guild(commands) {
 
 			await rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: commands_json });
 
-			log.success('Les commandes d\'application ont été enregistrées avec succès localement');
+			log.success('Commandes enregistrées avec succès localement');
 		} catch (error) {
 			log.error(error);
 		}
@@ -32,10 +32,9 @@ function Global(commands) {
 			commands.forEach(cmd => {
 				commands_json.push(cmd.data.toJSON());
 			});
-
 			await rest.put(Routes.applicationCommands(clientId), { body: commands_json });
 
-			log.success('Les commandes de l\'application ont été enregistrées avec succès globalement');
+			log.success('Commandes enregistrées avec succès globalement');
 		} catch (error) {
 			log.error(error);
 		}

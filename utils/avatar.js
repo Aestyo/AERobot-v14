@@ -14,7 +14,9 @@ async function download(user) {
 					file.close();
 					log.success(`Image de profil de ${user.tag} téléchargée`);
 					await webp.dwebp(`./cache/avatar_${user.tag}.webp`, `./cache/avatar_${user.tag}.png`, '-o');
-					fs.unlink(`./cache/avatar_${user.tag}.webp`, (err => {console.log(err);}));
+					fs.unlink(`./cache/avatar_${user.tag}.webp`, (err => {
+						if (err) log.error(err);
+					}));
 				});
 			});
 		} catch (error) {

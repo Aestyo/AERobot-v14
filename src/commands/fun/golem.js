@@ -23,8 +23,19 @@ module.exports = {
 		interaction.editReply({ content: 'GROS GOLEM', files: [attachment] });
 	},
 
-	async run(message) {
-		message.reply('Commande non disponible :(');
+	async run(client, message, args) {
+		let target;
+		try {
+			target = await client.users.fetch(args[0].slice(2, -1));
+			target = await client.users.cache.get(args[0].slice(2, -1));
+		} catch {
+			message.reply(`Impossible de récupérer l'utilisateur ${args[0]}`);
+			return;
+		}
+		const image = await GenerateGolem(target);
+		const attachment = new AttachmentBuilder(`./cache/golem_${target.tag}.png`, { name: `${image}.png` });
+		log.info(`${target.tag} est un golem`);
+		message.reply({ content: 'GROS GOLEM', files: [attachment] });
 	},
 };
 
