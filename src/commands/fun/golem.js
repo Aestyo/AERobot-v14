@@ -14,7 +14,7 @@ module.exports = {
 			.setDescription('Personne à golemiser')
 			.setRequired(true)),
 
-	async execute(interaction) {
+	async execute(client, interaction) {
 		await interaction.deferReply();
 		const target = interaction.options.getMember('target');
 		const image = await GenerateGolem(target.user);
@@ -43,7 +43,7 @@ async function GenerateGolem(user) {
 		});
 	});
 
-	avatar.download(user);
+	await avatar.download(user);
 
 	const images = [`./media/golem/${golemId}.png`, `./cache/avatar_${user.tag}.png`];
 	const jimps = [];
@@ -58,6 +58,6 @@ async function GenerateGolem(user) {
 			await data[1].scale(scale);
 			await data[1].flip(flip, false);
 			await data[0].composite(data[1], x, y);
-			await data[0].write(`./cache/golem_${user.tag}.png`);
+			await data[0].writeAsync(`./cache/golem_${user.tag}.png`);
 		});
 }

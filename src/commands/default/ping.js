@@ -8,16 +8,11 @@ module.exports = {
 		.setDefaultMemberPermissions(PermissionFlagsBits.SendMessages),
 
 	async execute(client, interaction) {
-		const firstEmbed = new EmbedBuilder().setTitle('⏳ Mesure de la latence en cours').setColor('4C59EB');
-
-		const message = await interaction.reply({ embeds: [firstEmbed], fetchReply: true });
-
+		await interaction.deferReply();
 		const pingresult = await ping.promise.probe('8.8.8.8');
-
 		const embed = new EmbedBuilder()
 			.setTitle('Mesure de vitesse de la connexion :')
 			.setColor('4C59EB')
-			.setThumbnail(client.user.displayAvatarURL())
 			.addFields(
 				{
 					name: 'Latence Bot <-> API Discord',
@@ -30,18 +25,12 @@ module.exports = {
 					inline: false,
 				},
 				{
-					name: 'Temps de réaction du bot',
-					value: `\`\`\`${message.createdTimestamp - interaction.createdTimestamp} ms\`\`\``,
-					inline: false,
-				},
-				{
 					name: 'Uptime',
 					value: `<t:${parseInt(client.readyTimestamp / 1000)}:R>`,
 					inline: false,
 				},
 			)
 			.setTimestamp();
-
 		interaction.editReply({ embeds: [embed] });
 	},
 
