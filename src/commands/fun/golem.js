@@ -19,7 +19,12 @@ module.exports = {
 		const target = interaction.options.getMember('target');
 		const image = await GenerateGolem(target.user);
 		const attachment = new AttachmentBuilder(`./cache/golem_${target.user.tag}.png`, { name: `${image}.png` });
+		log.info(`${target.user.tag} est un golem`);
 		interaction.editReply({ content: 'GROS GOLEM', files: [attachment] });
+	},
+
+	async run(message) {
+		message.reply('Commande non disponible :(');
 	},
 };
 

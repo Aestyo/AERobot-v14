@@ -1,7 +1,6 @@
 const log = require('../../../utils/logger');
 const { ActivityType } = require('discord.js');
-// const register = require('../../../utils/register');
-// const waitUntil = require('wait-until');
+const register = require('../../../utils/register');
 
 module.exports = {
 	name: 'ready',
@@ -24,43 +23,7 @@ module.exports = {
 		client.user.setActivity(str, { type: ActivityType.Watching });
 
 		// Enregistrement des commandes slash
-		// await register.Guild(client.commands.map((cmd) => cmd));
-		// await register.Global(client.commands.map((cmd) => cmd));
-
-		// Fonction de mise en mode "idle"
-		client.lastInteraction = Math.floor(Date.now() / 1000);
-		// WaitUntilIdle(client);
+		await register.Guild(client.commands.map((cmd) => cmd));
+		await register.Global(client.commands.map((cmd) => cmd));
 	},
 };
-
-/* WaitUntilIdle = async (client) => {
-	waitUntil()
-		.interval(6000)
-		.times(Infinity)
-		.condition(function() {
-			return client.lastInteraction + 5 * 60 <= Math.floor(Date.now() / 1000) ? true : false;
-		})
-		.done(function() {
-			client.user.setPresence({
-				status: 'idle',
-			});
-			log.info('Mise en veille, status changé pour "idle"');
-			WaitUntilOnline(client);
-		});
-};
-
-WaitUntilOnline = async (client) => {
-	waitUntil()
-		.interval(6000)
-		.times(Infinity)
-		.condition(function() {
-			return client.lastInteraction + 5 * 60 >= Math.floor(Date.now() / 1000) ? true : false;
-		})
-		.done(function() {
-			client.user.setPresence({
-				status: 'online',
-			});
-			log.info('Sortie de veille, status changé pour "online"');
-			WaitUntilIdle(client);
-		});
-};*/

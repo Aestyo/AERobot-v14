@@ -7,10 +7,10 @@ module.exports = async (client) => {
 	(await pGlob(`${process.cwd()}/src/commands/*/*.js`)).map(async (cmdFile) => {
 		const cmd = require(cmdFile);
 
-		if (!cmd.data.name) {
+		/* if (!cmd.data.name) {
 			return log.warn(`Commande incorrecte, nom manquant - ${cmdFile}`);
 		}
-		/* if (!cmd.data.default_member_permissions) {
+		 if (!cmd.data.default_member_permissions) {
 			return log.warn(`Commande incorrecte, permission(s) manquante(s) - ${cmdFile}`);
 		}*/
 

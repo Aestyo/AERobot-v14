@@ -1,4 +1,5 @@
 const { EmbedBuilder, SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const log = require('../../../utils/logger');
 const ping = require('ping');
 
 module.exports = {
@@ -7,7 +8,7 @@ module.exports = {
 		.setDescription('Effectue une requête de ping et affiche la latence enregistrée')
 		.setDefaultMemberPermissions(PermissionFlagsBits.SendMessages),
 
-	async execute(client, interaction) {
+	execute: async function(client, interaction) {
 		await interaction.deferReply();
 		const pingresult = await ping.promise.probe('8.8.8.8');
 		const embed = new EmbedBuilder()
@@ -31,10 +32,11 @@ module.exports = {
 				},
 			)
 			.setTimestamp();
+		log.info(`Latence Host <-> Google : ${pingresult.time} ms`);
 		interaction.editReply({ embeds: [embed] });
 	},
 
-	async run(message) {
-		await message.reply('ça marche on dirait!');
+	run: async function(message) {
+		message.reply('ça marche on dirait!');
 	},
 };

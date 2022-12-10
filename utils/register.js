@@ -6,16 +6,20 @@ const guildId = process.env.ID_DEVGUILD;
 
 async function Guild(commands) {
 	(async () => {
-		// try {
-		log.info('Rechargement des commandes locales...');
+		try {
+			log.info('Rechargement des commandes locales...');
 
-		console.log(commands);
-		await rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: commands });
+			const commands_json = [];
+			commands.forEach(cmd => {
+				commands_json.push(cmd.data.toJSON());
+			});
 
-		log.success('Les commandes d\'application ont été enregistrées avec succès localement');
-		// } catch (error) {
-		// 	log.error(error);
-		// }
+			await rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: commands_json });
+
+			log.success('Les commandes d\'application ont été enregistrées avec succès localement');
+		} catch (error) {
+			log.error(error);
+		}
 	})();
 }
 
@@ -24,7 +28,12 @@ function Global(commands) {
 		try {
 			log.info('Rechargement des commandes globales...');
 
-			await rest.put(Routes.applicationCommands(clientId), { body: commands });
+			const commands_json = [];
+			commands.forEach(cmd => {
+				commands_json.push(cmd.data.toJSON());
+			});
+
+			await rest.put(Routes.applicationCommands(clientId), { body: commands_json });
 
 			log.success('Les commandes de l\'application ont été enregistrées avec succès globalement');
 		} catch (error) {

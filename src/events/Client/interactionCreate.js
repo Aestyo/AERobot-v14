@@ -1,5 +1,8 @@
+// const log = require('../../../utils/logger');
+
 module.exports = {
 	name: 'interactionCreate',
+
 	async execute(client, interaction) {
 		if (!interaction.isChatInputCommand()) return;
 
@@ -9,7 +12,7 @@ module.exports = {
 			console.error(`No command matching ${interaction.commandName} was found.`);
 			return;
 		}
-
+		console.log(command);
 		try {
 			await command.execute(client, interaction);
 		} catch (error) {
@@ -17,4 +20,5 @@ module.exports = {
 			console.error(error);
 		}
 	},
+
 };
