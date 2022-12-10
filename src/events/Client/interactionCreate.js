@@ -2,7 +2,6 @@ const log = require('../../../utils/logger');
 
 module.exports = {
 	name: 'interactionCreate',
-
 	async execute(client, interaction) {
 
 		switch (interaction.commandType) {
