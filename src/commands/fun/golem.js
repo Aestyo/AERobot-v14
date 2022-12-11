@@ -59,9 +59,7 @@ async function GenerateGolem(user) {
 		});
 	});
 
-	const t = await avatar.download(user);
-	console.log(t);
-	// await new Promise((resolve) => setTimeout(resolve, 1000));
+	await avatar.download(user);
 
 	const images = [`./media/golem/${golemId}.png`, `./cache/avatar_${user.tag}.png`];
 	const jimps = [];
