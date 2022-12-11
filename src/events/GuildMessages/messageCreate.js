@@ -1,4 +1,5 @@
 const log = require('../../../utils/logger');
+const attachment = require('../../../utils/attachment');
 
 module.exports = {
 	name: 'messageCreate',
@@ -6,7 +7,8 @@ module.exports = {
 	async execute(client, message) {
 		if (message.author.bot) return;
 		if (!message.content.startsWith(process.env.PREFIX)) {
-			log.info(`[${message.guild.name}]#[${message.channel.name}] : ${message.author.tag} a écrit "${message.content}"`);
+			const attachmentStr = message.attachments.size > 0 ? await attachment.download(message.attachments) : '';
+			log.info(`[${message.guild.name}]#[${message.channel.name}] : ${message.author.tag} a écrit "${message.content}" ${attachmentStr}`);
 		} else {
 			run(client, message);
 		}

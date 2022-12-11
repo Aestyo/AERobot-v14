@@ -5,14 +5,14 @@ module.exports = {
 	async execute(client, interaction) {
 
 		switch (interaction.commandType) {
-		case 1:{
-			Exec(client, interaction);
-			break;
-		}
-		default:{
-			log.error('Type de commande non géré : ' + interaction.commandType);
-			return;
-		}
+			case 1:{
+				Exec(client, interaction);
+				break;
+			}
+			default:{
+				log.error('Type de commande non géré : ' + interaction.commandType);
+				return;
+			}
 		}
 	},
 };

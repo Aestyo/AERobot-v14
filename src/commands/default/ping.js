@@ -8,8 +8,6 @@ module.exports = {
 		.setDescription('Effectue une requête de ping et affiche la latence enregistrée')
 		.setDefaultMemberPermissions(PermissionFlagsBits.SendMessages),
 
-	ownerOnly: true,
-
 	execute: async function(client, interaction) {
 		await interaction.deferReply();
 		const pingresult = await ping.promise.probe('8.8.8.8');

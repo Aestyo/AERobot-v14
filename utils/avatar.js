@@ -14,7 +14,7 @@ async function download(user) {
 					file.close();
 					log.success(`Image de profil de ${user.tag} téléchargée`);
 					await webp.dwebp(`./cache/avatar_${user.tag}.webp`, `./cache/avatar_${user.tag}.png`, '-o');
-					fs.unlink(`./cache/avatar_${user.tag}.webp`, (err => {
+					fs.unlinkSync(`./cache/avatar_${user.tag}.webp`, (err => {
 						if (err) log.error(err);
 					}));
 				});
@@ -23,6 +23,7 @@ async function download(user) {
 			log.error(`Impossible de télécharger la photo de profil de ${user.tag}`);
 		}
 	}
+	return 0;
 }
 
 module.exports = { download };
