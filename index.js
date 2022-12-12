@@ -8,8 +8,9 @@
  * | |   | || |____/\| | \ \__| |___| || |___\ || |___| |   | |
  * |/     \||_______/|/   \__/|_______||______/ |_______|   |_|
  */
-// Déclaration des modules principaux : discordjs, mongodb
+// Déclaration des modules principaux : discordjs, music-player mongodb
 const { Client, Collection, GatewayIntentBits } = require('discord.js');
+// const { Player } = require('discord-music-player');
 
 // Déclaration des modules utilitaires : logger, .env
 const log = require('./utils/logger.js');
@@ -23,6 +24,7 @@ log.init();
 const client = new Client({ intents: [
 	GatewayIntentBits.Guilds,
 	GatewayIntentBits.GuildMessages,
+	GatewayIntentBits.GuildVoiceStates,
 	GatewayIntentBits.MessageContent,
 	GatewayIntentBits.GuildMembers,
 ] });
@@ -34,6 +36,9 @@ log.info('Chargement des commandes et des évènements');
 ['commands', 'events'].forEach((handler) => {
 	require(`./handlers/${handler}`)(client);
 });
+
+// Création de l'objet lecteur de musique
+client.audioPlayers = [];
 
 // Connexion du client à l'API de Discord
 client.login(process.env.TOKEN_DISCORD);
