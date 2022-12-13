@@ -13,7 +13,7 @@ module.exports = {
 		const pingresult = await ping.promise.probe('8.8.8.8');
 		const embed = new EmbedBuilder()
 			.setTitle('Mesure de vitesse de la connexion :')
-			.setColor('4C59EB')
+			.setColor(0x4C59EB)
 			.addFields(
 				{
 					name: 'Latence Bot <-> API Discord',

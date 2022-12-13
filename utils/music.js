@@ -1,6 +1,7 @@
 const { createReadStream } = require('node:fs');
 const { getVoiceConnection, createAudioPlayer, createAudioResource, StreamType, joinVoiceChannel } = require('@discordjs/voice');
 const { EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const { humanUnitSize } = require('../utils/unitSize');
 const ytdl = require('ytdl-core');
 const ytquery = require('yt-search');
 const fs = require('fs');
@@ -23,13 +24,46 @@ async function CreateAudioPlayer(client, interaction) {
 	const answer = await interaction.channel.send(`<a:loading:1051599264498851852> Création du lecteur pour **${interaction.guild.name}**`);
 	const player = createAudioPlayer();
 	player.guild = interaction.guild.id;
+	player.voiceChannel = null;
+	player.queue = new Array;
+	player.addListener('stateChange', (oldOne, newOne) => {
+		switch (newOne.status) {
+			case 'idle':{
+				break;
+			}
+			case 'playing':{
+				const metadata = newOne.resource.metadata;
+				const exampleEmbed = new EmbedBuilder()
+					.setColor(0x4C59EB)
+					.setTitle(metadata.title)
+					.setURL(metadata.url)
+					.setAuthor({ name: 'En cours de lecture :' })
+					.setDescription(`De ${metadata.author.name} - ${humanUnitSize(metadata.views)} vues - ${metadata.ago} \n\n${metadata.description}`)
+					.setImage(metadata.image)
+					.setTimestamp()
+					.setFooter({ text: 'Powered by Æstyo Corp.' });
+
+				interaction.channel.send({ embeds: [exampleEmbed] });
+				break;
+			}
+			case 'paused':{
+				break;
+			}
+			case 'buffering':{
+				break;
+			}
+		}
+		if (newOne.status == 'idle') {
+			console.log('The song finished');
+		}
+	});
 	client.audioPlayers.push(player);
 	await new Promise((resolve) => setTimeout(resolve, 1000));
-	answer.edit('<:Yes:1051950543997763748> Lecteur crée avec succès');
+	answer.edit(`<:Yes:1051950543997763748> Lecteur connecté à **${interaction.guild.name}**`);
 	return player;
 }
 
-function JoinChannel(interaction) {
+function JoinChannel(interaction, player) {
 	const voiceChannel = interaction.member.voice.channel;
 	if (!voiceChannel) {
 		interaction.editReply(':no_entry:  Impossible de rejoindre le salon vocal');
@@ -45,7 +79,7 @@ function JoinChannel(interaction) {
 		return 1;
 	}
 	joinVoiceChannel({ channelId: interaction.member.voice.channel.id, guildId: interaction.guild.id, adapterCreator: interaction.guild.voiceAdapterCreator });
-	interaction.editReply(`<:Yes:1051950543997763748> **${interaction.member.voice.channel.name}** connecté`);
+	player.voiceChannel = voiceChannel;
 }
 
 async function FindSong(interaction, query) {
@@ -75,38 +109,49 @@ async function FindSong(interaction, query) {
 		),
 	);*/
 	message.delete();
+	interaction.channel.send(`<:Yes:1051950543997763748> Titre validé : **${choices[0].title}**`);
 	return choices[0];
 }
 
 async function DownloadSong(interaction, song) {
-	const answer = await interaction.channel.send(`<a:loading:1051599264498851852> Téléchargement de  **${song.title}**`);
-	return new Promise((resolve) => {
-		const stream = ytdl(song.url, { filter: 'audioonly', audioBitrate: 128, format: 'webm', audioCodec: 'opus' });
-		stream.pipe(fs.createWriteStream(`./cache/${song.title}.webm`));
-		stream.on('finish', function() {
-			answer.edit('<:Yes:1051950543997763748> Vidéo téléchargée');
-			resolve(`./cache/${song.title}.webm`);
+	if (!fs.existsSync(`./cache/${song.title}.webm`)) {
+		const answer = await interaction.channel.send(`<a:loading:1051599264498851852> Téléchargement de  **${song.title}**`);
+		return new Promise((resolve) => {
+			const stream = ytdl(song.url, { filter: 'audioonly', audioBitrate: 128, format: 'webm', audioCodec: 'opus' });
+			stream.pipe(fs.createWriteStream(`./cache/${song.title}.webm`));
+			stream.on('finish', function() {
+				answer.edit(`<:Yes:1051950543997763748> Téléchargement terminé de **${song.title}**`);
+				resolve(song);
+			});
 		});
-	});
+	} else {
+		return song;
+	}
 }
 
 function PlaySong(interaction, player, song) {
-	const resource = createAudioResource(createReadStream(song, {
-		inputType: StreamType.OggOpus,
-	}));
-	resource.playStream.on('error', error => {
-		console.error('Error:', error.message, 'with track', resource.metadata.title);
+	const ressource = createAudioResource(createReadStream(`./cache/${song.title}.webm`), {
+		inputType: StreamType.WebmOpus,
+		metadata: {
+			title: song.title,
+			description: song.description,
+			url: song.url,
+			image: song.image,
+			thumbnail: song.thumbnail,
+			duration: song.duration,
+			author: song.author,
+			views: song.views,
+			ago: song.ago,
+		},
 	});
-	const connection = getVoiceConnection(interaction.guild.id);
+	const connection = getVoiceConnection(player.guild);
 	connection.subscribe(player);
-	player.play(resource);
-	console.log(player);
-	console.log(connection);
-	console.log(resource);
-	console.log('jsuis arrivé au bout');
+	player.play(ressource);
+	player.queue.push(ressource);
 }
 
-function ShowPlayer() {
+function ShowPlayer(interaction, player) {
+	console.log(player);
 	const exampleEmbed = new EmbedBuilder()
 		.setColor(0x0099FF)
 		.setTitle('Some title')
