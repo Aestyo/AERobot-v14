@@ -6,24 +6,20 @@ const ytdl = require('ytdl-core');
 const ytquery = require('yt-search');
 const fs = require('fs');
 
-async function GetAudioPlayer(client, interaction) {
+async function GetAudioPlayer(client, guild) {
 	let playerToBeReturned = null;
 	client.audioPlayers.forEach(player => {
-		if (player.guild == interaction.guild.id) {
+		if (player.guild == guild.id) {
 			playerToBeReturned = player;
 		}
 	});
-	if (!playerToBeReturned) {
-		return CreateAudioPlayer(client, interaction);
-	} else {
-		return playerToBeReturned;
-	}
+	return playerToBeReturned;
 }
 
-async function CreateAudioPlayer(client, interaction) {
-	const answer = await interaction.channel.send(`<a:loading:1051599264498851852> Création du lecteur pour **${interaction.guild.name}**`);
+async function CreateAudioPlayer(client, guild, channel) {
+	const answer = await channel.send(`<a:loading:1051599264498851852> Création du lecteur pour **${guild.name}**`);
 	const player = createAudioPlayer();
-	player.guild = interaction.guild.id;
+	player.guild = guild.id;
 	player.voiceChannel = null;
 	player.queue = new Array;
 	player.addListener('stateChange', (oldOne, newOne) => {
@@ -43,7 +39,7 @@ async function CreateAudioPlayer(client, interaction) {
 					.setTimestamp()
 					.setFooter({ text: 'Powered by Æstyo Corp.' });
 
-				interaction.channel.send({ embeds: [exampleEmbed] });
+				channel.send({ embeds: [exampleEmbed] });
 				break;
 			}
 			case 'paused':{
@@ -59,39 +55,39 @@ async function CreateAudioPlayer(client, interaction) {
 	});
 	client.audioPlayers.push(player);
 	await new Promise((resolve) => setTimeout(resolve, 1000));
-	answer.edit(`<:Yes:1051950543997763748> Lecteur connecté à **${interaction.guild.name}**`);
+	answer.edit(`<:Yes:1051950543997763748> Lecteur connecté à **${guild.name}**`);
 	return player;
 }
 
-function JoinChannel(interaction, player) {
-	const voiceChannel = interaction.member.voice.channel;
+function JoinChannel(client, channel, member, player) {
+	const voiceChannel = member.voice.channel;
 	if (!voiceChannel) {
-		interaction.editReply(':no_entry:  Impossible de rejoindre le salon vocal');
+		channel.send(':no_entry:  Impossible de rejoindre le salon vocal');
 		return 1;
 	}
-	const permissions = voiceChannel.permissionsFor(interaction.client.user);
+	const permissions = voiceChannel.permissionsFor(client.user);
 	if (!permissions.has(PermissionFlagsBits.Connect)) {
-		interaction.editReply(':no_entry:  Je n\'ai pas la permission de rejoindre le channel');
+		channel.send(':no_entry:  Je n\'ai pas la permission de rejoindre le channel');
 		return 1;
 	}
 	if (!permissions.has(PermissionFlagsBits.Speak)) {
-		interaction.editReply(':no_entry:  Je n\'ai pas la permission de parler dans le channel');
+		channel.send(':no_entry:  Je n\'ai pas la permission de parler dans le channel');
 		return 1;
 	}
-	joinVoiceChannel({ channelId: interaction.member.voice.channel.id, guildId: interaction.guild.id, adapterCreator: interaction.guild.voiceAdapterCreator });
+	joinVoiceChannel({ channelId: member.voice.channel.id, guildId: channel.guild.id, adapterCreator: channel.guild.voiceAdapterCreator });
 	player.voiceChannel = voiceChannel;
 }
 
-async function FindSong(interaction, query) {
+async function FindSong(channel, user, query) {
 	const videoResult = await ytquery(query);
 	const choices = (videoResult.videos.length > 2) ? [ videoResult.videos[0], videoResult.videos[1], videoResult.videos[2] ] : null;
 
 	const exampleEmbed = new EmbedBuilder()
 		.setURL('https://github.com/Aestyo/AERobot')
 		.setAuthor({
-			name: `${interaction.user.tag}`,
-			iconURL: interaction.user.avatarURL(),
-			url: `https://discordapp.com/users/${interaction.user.id}`,
+			name: `${user.tag}`,
+			iconURL: user.avatarURL(),
+			url: `https://discordapp.com/users/${user.id}`,
 		})
 		.setColor('#4C59EB')
 		.setFooter({ text: 'Powered by Æstyo Corp.' })
@@ -102,20 +98,20 @@ async function FindSong(interaction, query) {
 			{ name: `:two: ${choices[1].title} (${choices[1].timestamp})`, value: `${choices[1].author.name}` },
 			{ name: `:three: ${choices[2].title} (${choices[2].timestamp})`, value: `${choices[2].author.name}` },
 		);
-	const message = await interaction.channel.send({ embeds: [exampleEmbed] });
+	const message = await channel.send({ embeds: [exampleEmbed] });
 	/* message.react('1️⃣').then(
 		message.react('2️⃣').then(
 			message.react('3️⃣'),
 		),
 	);*/
 	message.delete();
-	interaction.channel.send(`<:Yes:1051950543997763748> Titre validé : **${choices[0].title}**`);
+	channel.send(`<:Yes:1051950543997763748> Titre validé : **${choices[0].title}**`);
 	return choices[0];
 }
 
-async function DownloadSong(interaction, song) {
+async function DownloadSong(channel, song) {
 	if (!fs.existsSync(`./cache/${song.title}.webm`)) {
-		const answer = await interaction.channel.send(`<a:loading:1051599264498851852> Téléchargement de  **${song.title}**`);
+		const answer = await channel.send(`<a:loading:1051599264498851852> Téléchargement de  **${song.title}**`);
 		return new Promise((resolve) => {
 			const stream = ytdl(song.url, { filter: 'audioonly', audioBitrate: 128, format: 'webm', audioCodec: 'opus' });
 			stream.pipe(fs.createWriteStream(`./cache/${song.title}.webm`));
@@ -129,7 +125,7 @@ async function DownloadSong(interaction, song) {
 	}
 }
 
-function PlaySong(interaction, player, song) {
+function PlaySong(player, song) {
 	const ressource = createAudioResource(createReadStream(`./cache/${song.title}.webm`), {
 		inputType: StreamType.WebmOpus,
 		metadata: {
@@ -150,27 +146,37 @@ function PlaySong(interaction, player, song) {
 	player.queue.push(ressource);
 }
 
-function ShowPlayer(interaction, player) {
-	console.log(player);
-	const exampleEmbed = new EmbedBuilder()
-		.setColor(0x0099FF)
-		.setTitle('Some title')
-		.setURL('https://discord.js.org/')
-		.setAuthor({ name: 'Some name', iconURL: 'https://i.imgur.com/AfFp7pu.png', url: 'https://discord.js.org' })
-		.setDescription('Some description here')
-		.setThumbnail('https://i.imgur.com/AfFp7pu.png')
-		.addFields(
-			{ name: 'Regular field title', value: 'Some value here' },
-			{ name: '\u200B', value: '\u200B' },
-			{ name: 'Inline field title', value: 'Some value here', inline: true },
-			{ name: 'Inline field title', value: 'Some value here', inline: true },
-		)
-		.addFields({ name: 'Inline field title', value: 'Some value here', inline: true })
-		.setImage('https://i.imgur.com/AfFp7pu.png')
+function ShowPlayer(user, guild, player) {
+	const embed = new EmbedBuilder()
+		.setAuthor({
+			name: `${user.tag}`,
+			iconURL: user.avatarURL(),
+			url: `https://discordapp.com/users/${user.id}`,
+		})
+		.setURL('https://www.youtube.com')
+		.setColor('#4C59EB')
+		.setFooter({ text: 'Powered by Æstyo Corp.' })
 		.setTimestamp()
-		.setFooter({ text: 'Some footer text here', iconURL: 'https://i.imgur.com/AfFp7pu.png' });
+		.setTitle(`Lecteur musical de __**${guild.name}**__`);
 
-	return exampleEmbed;
+	switch (player._state.status) {
+		case 'idle':{
+			embed.setDescription('La playlist est vide')
+				.setThumbnail('https://imgur.com/RSc1nz1.png')
+				.setImage('https://imgur.com/13nB881.png');
+			break;
+		}
+		case 'playing':{
+			const metadata = player.queue[0].metadata;
+			console.log(metadata);
+			embed.setDescription(`Joue actuellement **${metadata.title}** de **${metadata.author.name}**`)
+				.setThumbnail('https://imgur.com/cxC9flw.png')
+				.setImage('https://i.imgur.com/ayiVJSS.gif');
+			break;
+		}
+	}
+
+	return embed;
 }
 
-module.exports = { GetAudioPlayer, JoinChannel, FindSong, DownloadSong, ShowPlayer, PlaySong };
+module.exports = { GetAudioPlayer, CreateAudioPlayer, JoinChannel, FindSong, DownloadSong, ShowPlayer, PlaySong };

@@ -21,9 +21,9 @@ module.exports = {
 		const connection = getVoiceConnection(message.guild.id);
 		if (connection) {
 			connection.destroy();
-			message.reply('<:Yes:1051950543997763748> Déconnecté');
+			message.channel.send('<:Yes:1051950543997763748> Déconnecté');
 		} else {
-			message.reply('<:No:1051950542454276117> Je n\'ai aucun channel à déconnecter');
+			message.channel.send('<:No:1051950542454276117> Je n\'ai aucun channel à déconnecter');
 		}
 	},
 
