@@ -38,7 +38,7 @@ log.info('Chargement des commandes et des évènements');
 });
 
 // Création de l'objet lecteur de musique
-client.audioPlayers = [];
+client.MusicPlayers = [];
 
 // Connexion du client à l'API de Discord
 client.login(process.env.TOKEN_DISCORD);

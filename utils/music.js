@@ -1,82 +1,9 @@
 const { createReadStream } = require('node:fs');
-const { getVoiceConnection, createAudioPlayer, createAudioResource, StreamType, joinVoiceChannel } = require('@discordjs/voice');
-const { EmbedBuilder, PermissionFlagsBits } = require('discord.js');
-const { humanUnitSize } = require('../utils/unitSize');
+const { demuxProbe, createAudioResource } = require('@discordjs/voice');
+const { EmbedBuilder } = require('discord.js');
 const ytdl = require('ytdl-core');
 const ytquery = require('yt-search');
 const fs = require('fs');
-
-async function GetAudioPlayer(client, guild) {
-	let playerToBeReturned = null;
-	client.audioPlayers.forEach(player => {
-		if (player.guild == guild.id) {
-			playerToBeReturned = player;
-		}
-	});
-	return playerToBeReturned;
-}
-
-async function CreateAudioPlayer(client, guild, channel) {
-	const answer = await channel.send(`<a:loading:1051599264498851852> Création du lecteur pour **${guild.name}**`);
-	const player = createAudioPlayer();
-	player.guild = guild.id;
-	player.voiceChannel = null;
-	player.queue = new Array;
-	player.addListener('stateChange', (oldOne, newOne) => {
-		switch (newOne.status) {
-			case 'idle':{
-				break;
-			}
-			case 'playing':{
-				const metadata = newOne.resource.metadata;
-				const exampleEmbed = new EmbedBuilder()
-					.setColor(0x4C59EB)
-					.setTitle(metadata.title)
-					.setURL(metadata.url)
-					.setAuthor({ name: 'En cours de lecture :' })
-					.setDescription(`De ${metadata.author.name} - ${humanUnitSize(metadata.views)} vues - ${metadata.ago} \n\n${metadata.description}`)
-					.setImage(metadata.image)
-					.setTimestamp()
-					.setFooter({ text: 'Powered by Æstyo Corp.' });
-
-				channel.send({ embeds: [exampleEmbed] });
-				break;
-			}
-			case 'paused':{
-				break;
-			}
-			case 'buffering':{
-				break;
-			}
-		}
-		if (newOne.status == 'idle') {
-			console.log('The song finished');
-		}
-	});
-	client.audioPlayers.push(player);
-	await new Promise((resolve) => setTimeout(resolve, 1000));
-	answer.edit(`<:Yes:1051950543997763748> Lecteur connecté à **${guild.name}**`);
-	return player;
-}
-
-function JoinChannel(client, channel, member, player) {
-	const voiceChannel = member.voice.channel;
-	if (!voiceChannel) {
-		channel.send(':no_entry:  Impossible de rejoindre le salon vocal');
-		return 1;
-	}
-	const permissions = voiceChannel.permissionsFor(client.user);
-	if (!permissions.has(PermissionFlagsBits.Connect)) {
-		channel.send(':no_entry:  Je n\'ai pas la permission de rejoindre le channel');
-		return 1;
-	}
-	if (!permissions.has(PermissionFlagsBits.Speak)) {
-		channel.send(':no_entry:  Je n\'ai pas la permission de parler dans le channel');
-		return 1;
-	}
-	joinVoiceChannel({ channelId: member.voice.channel.id, guildId: channel.guild.id, adapterCreator: channel.guild.voiceAdapterCreator });
-	player.voiceChannel = voiceChannel;
-}
 
 async function FindSong(channel, user, query) {
 	const videoResult = await ytquery(query);
@@ -125,9 +52,10 @@ async function DownloadSong(channel, song) {
 	}
 }
 
-function PlaySong(player, song) {
-	const ressource = createAudioResource(createReadStream(`./cache/${song.title}.webm`), {
-		inputType: StreamType.WebmOpus,
+async function PlaySong(player, song) {
+	const { stream, type } = await demuxProbe(createReadStream(`./cache/${song.title}.webm`));
+	const ressource = createAudioResource(stream, {
+		inputType: type,
 		metadata: {
 			title: song.title,
 			description: song.description,
@@ -140,43 +68,7 @@ function PlaySong(player, song) {
 			ago: song.ago,
 		},
 	});
-	const connection = getVoiceConnection(player.guild);
-	connection.subscribe(player);
 	player.play(ressource);
-	player.queue.push(ressource);
 }
 
-function ShowPlayer(user, guild, player) {
-	const embed = new EmbedBuilder()
-		.setAuthor({
-			name: `${user.tag}`,
-			iconURL: user.avatarURL(),
-			url: `https://discordapp.com/users/${user.id}`,
-		})
-		.setURL('https://www.youtube.com')
-		.setColor('#4C59EB')
-		.setFooter({ text: 'Powered by Æstyo Corp.' })
-		.setTimestamp()
-		.setTitle(`Lecteur musical de __**${guild.name}**__`);
-
-	switch (player._state.status) {
-		case 'idle':{
-			embed.setDescription('La playlist est vide')
-				.setThumbnail('https://imgur.com/RSc1nz1.png')
-				.setImage('https://imgur.com/13nB881.png');
-			break;
-		}
-		case 'playing':{
-			const metadata = player.queue[0].metadata;
-			console.log(metadata);
-			embed.setDescription(`Joue actuellement **${metadata.title}** de **${metadata.author.name}**`)
-				.setThumbnail('https://imgur.com/cxC9flw.png')
-				.setImage('https://i.imgur.com/ayiVJSS.gif');
-			break;
-		}
-	}
-
-	return embed;
-}
-
-module.exports = { GetAudioPlayer, CreateAudioPlayer, JoinChannel, FindSong, DownloadSong, ShowPlayer, PlaySong };
+module.exports = { FindSong, DownloadSong, PlaySong };
