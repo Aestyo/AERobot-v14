@@ -18,6 +18,9 @@ module.exports = {
 		await interaction.deferReply();
 		const target = interaction.options.getMember('target');
 		const image = await GenerateGolem(target.user);
+		if (image == -1) {
+			interaction.editReply('Erreur lors de la création du golem.');
+		}
 		const attachment = new AttachmentBuilder(`./cache/golem_${target.user.tag}.png`, { name: `${image}.png` });
 		log.info(`${target.user.tag} est un golem`);
 		interaction.editReply({ content: 'GROS GOLEM', files: [attachment] });
@@ -33,6 +36,9 @@ module.exports = {
 			return;
 		}
 		const image = await GenerateGolem(target);
+		if (image == -1) {
+			message.reply('Erreur lors de la création du golem.');
+		}
 		const attachment = new AttachmentBuilder(`./cache/golem_${target.tag}.png`, { name: `${image}.png` });
 		log.info(`${target.tag} est un golem`);
 		message.reply({ content: 'GROS GOLEM', files: [attachment] });
@@ -59,7 +65,9 @@ async function GenerateGolem(user) {
 		});
 	});
 
-	await avatar.download(user);
+	if (await avatar.download(user) == -1) {
+		return -1;
+	}
 
 	const images = [`./media/golem/${golemId}.png`, `./cache/avatar_${user.tag}.png`];
 	const jimps = [];

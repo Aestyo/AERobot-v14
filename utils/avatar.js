@@ -1,7 +1,7 @@
 const log = require('./logger');
-const webp = require('webp-converter');
 const https = require('https');
 const fs = require('fs');
+const sharp = require('sharp');
 
 async function download(user) {
 	if (!fs.existsSync(`./cache/avatar_${user.tag}.png`)) {
@@ -10,10 +10,15 @@ async function download(user) {
 			const file = fs.createWriteStream(`./cache/avatar_${user.tag}.webp`);
 			await get_HTTPS(user.avatarURL({ size: 512, forceStatic: true }), file);
 			log.success(`Image de profil de ${user.tag} téléchargée`);
-			await webp.dwebp(`./cache/avatar_${user.tag}.webp`, `./cache/avatar_${user.tag}.png`, '-o');
+			await sharp(`./cache/avatar_${user.tag}.webp`).toFile(`./cache/avatar_${user.tag}.png`)
+				.catch(err => {
+					console.log(err);
+					return -1;
+				});
 			fs.unlinkSync(`./cache/avatar_${user.tag}.webp`, (err => {
 				if (err) log.error(err);
 			}));
+
 		} catch (error) {
 			log.error(`Impossible de télécharger la photo de profil de ${user.tag}`);
 		}
