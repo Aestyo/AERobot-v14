@@ -1,4 +1,3 @@
-const { GetAudioPlayer, CreateAudioPlayer, ShowPlayer } = require('../../../utils/music');
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 
 module.exports = {
@@ -8,19 +7,11 @@ module.exports = {
 		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
 	execute: async function(client, interaction) {
-		let audioPlayer = await GetAudioPlayer(client, interaction.guild);
-		if (!audioPlayer) {
-			audioPlayer = await CreateAudioPlayer(client, interaction.guild, interaction.channel);
-		}
-		interaction.reply({ embeds: [ShowPlayer(interaction.user, interaction.guild)] });
+		interaction.reply('Pas encore implémenté UwU');
 	},
 
 	run: async function(client, message) {
-		let audioPlayer = await GetAudioPlayer(client, message.guild);
-		if (!audioPlayer) {
-			audioPlayer = await CreateAudioPlayer(client, message.guild, message.channel);
-		}
-		message.channel.send({ embeds: [ShowPlayer(message.author, message.guild, audioPlayer)] });
+		message.reply('Pas encore implémenté UwU');
 	},
 
 };

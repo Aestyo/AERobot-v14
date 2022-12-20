@@ -1,4 +1,5 @@
-const { GetAudioPlayer, CreateAudioPlayer } = require('../../../utils/music');
+const { GetAudioPlayer, CreateAudioPlayer } = require('../../../utils/player');
+const { getVoiceConnection } = require('@discordjs/voice');
 const { EmbedBuilder, SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 
 module.exports = {
@@ -8,20 +9,32 @@ module.exports = {
 		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
 	execute: async function(client, interaction) {
-		let audioPlayer = await GetAudioPlayer(client, interaction.guild);
-		if (!audioPlayer) {
-			audioPlayer = await CreateAudioPlayer(client, interaction.guild, interaction.channel);
+		let player = await GetAudioPlayer(client, interaction.guild);
+		if (!player) {
+			const answer = await interaction.channel.send(`<a:loading:1051599264498851852> Création du lecteur pour **${interaction.guild.name}**`);
+			player = await CreateAudioPlayer(client, interaction.guild, interaction.channel);
+			answer.edit(`<:Yes:1051950543997763748> Lecteur connecté à **${interaction.guild.name}#${interaction.channel.name}**`);
 		}
-		audioPlayer.pause(true);
+		if (getVoiceConnection(interaction.guild.id) == null) {
+			if (player.join(client, interaction.member) == 1) return;
+			interaction.channel.send(`<:Yes:1051950543997763748> Connecté vocalement à **${interaction.member.voice.channel.name}**`);
+		}
+		player.pause();
 		interaction.reply({ embeds: [Embedded(interaction.user, interaction.guild)] });
 	},
 
 	run: async function(client, message) {
-		let audioPlayer = await GetAudioPlayer(client, message.guild);
-		if (!audioPlayer) {
-			audioPlayer = await CreateAudioPlayer(client, message.guild, message.channel);
+		let player = await GetAudioPlayer(client, message.guild);
+		if (!player) {
+			const answer = await message.channel.send(`<a:loading:1051599264498851852> Création du lecteur pour **${message.guild.name}**`);
+			player = await CreateAudioPlayer(client, message.guild, message.channel);
+			answer.edit(`<:Yes:1051950543997763748> Lecteur connecté à **${message.guild.name}#${message.channel.name}**`);
 		}
-		audioPlayer.pause(true);
+		if (getVoiceConnection(message.guild.id) == null) {
+			if (player.join(client, message.member) == 1) return;
+			message.channel.send(`<:Yes:1051950543997763748> Connecté vocalement à **${message.member.voice.channel.name}**`);
+		}
+		player.pause();
 		message.channel.send({ embeds: [Embedded(message.author, message.guild)] });
 	},
 
@@ -40,7 +53,6 @@ function Embedded(user, guild) {
 		.setTimestamp()
 		.setTitle(`Lecteur musical de __**${guild.name}**__`)
 		.setDescription('La lecture a été mise en pause')
-		.setThumbnail('https://imgur.com/Yum9q6Q.png')
-		.setImage('https://imgur.com/13nB881.png');
+		.setThumbnail('https://imgur.com/Yum9q6Q.png');
 	return embed;
 }

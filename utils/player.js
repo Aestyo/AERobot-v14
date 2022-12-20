@@ -1,5 +1,4 @@
-const { createReadStream } = require('node:fs');
-const { createAudioPlayer, NoSubscriberBehavior, demuxProbe, getVoiceConnection, createAudioResource, joinVoiceChannel } = require('@discordjs/voice');
+const { createAudioPlayer, NoSubscriberBehavior, getVoiceConnection, joinVoiceChannel } = require('@discordjs/voice');
 const { EmbedBuilder, PermissionFlagsBits } = require('discord.js');
 const { humanUnitSize } = require('../utils/unitSize');
 
@@ -10,13 +9,28 @@ class MusicPlayer {
 		this.channel = channel;
 		this.voiceChannel = null;
 		this.queue = [];
+		this.loop = false;
+		this.shuffle = false;
 
 		this.audio.addListener('stateChange', (oldOne, newOne) => {
 			if (oldOne.status == 'playing' && newOne.status == 'idle') {
-				this.channel.send('J\'ai fini de lire la chanson!');
 				this.queue.shift();
 				if (this.queue.length > 0) this.audio.play(this.queue[0]);
-				else this.channel.send('J\'ai fini de lire la playlist');
+			}
+			if ((oldOne.status == 'idle' && newOne.status == 'buffering') || (oldOne.status == 'idle' && newOne.status == 'playing')) {
+				const metadata = this.queue[0].metadata;
+				const playingEmbed = new EmbedBuilder()
+					.setColor(0x4C59EB)
+					.setTitle(metadata.title)
+					.setURL(metadata.url)
+					.setAuthor({ name: 'En cours de lecture :' })
+					.setDescription(`De ${metadata.author.name} - ${humanUnitSize(metadata.views)} vues - ${metadata.ago}`)
+					.setImage(metadata.image)
+					.setThumbnail('https://imgur.com/ayiVJSS.gif')
+					.setTimestamp()
+					.setFooter({ text: 'Powered by Æstyo Corp.' });
+				if (!metadata.ago) playingEmbed.setDescription(`De ${metadata.author.name} - ${humanUnitSize(metadata.views)} vues`);
+				this.channel.send({ embeds: [playingEmbed] });
 			}
 		});
 	}
@@ -25,9 +39,15 @@ class MusicPlayer {
 		this.queue.push(ressource);
 		if (this.audio.state.status == 'idle') {
 			this.audio.play(this.queue[0]);
-		} else {
-			this.channel.send('Je commence à lire dès que l\'autre est finie quoi');
 		}
+	}
+
+	pause() {
+		this.audio.pause(true);
+	}
+
+	resume() {
+		this.audio.unpause();
 	}
 
 	join(client, member) {
@@ -50,8 +70,40 @@ class MusicPlayer {
 		getVoiceConnection(this.guild.id).subscribe(this.audio);
 	}
 
-	show() {
-		console.log('Là je me montre ^^');
+	leave() {
+		this.voiceChannel = null;
+		getVoiceConnection(this.guild.id).destroy();
+	}
+
+	show(user, guild) {
+		const embed = new EmbedBuilder()
+			.setAuthor({
+				name: `${user.tag}`,
+				iconURL: user.avatarURL(),
+				url: `https://discordapp.com/users/${user.id}`,
+			})
+			.setURL('https://www.youtube.com')
+			.setColor('#4C59EB')
+			.setFooter({ text: 'Powered by Æstyo Corp.' })
+			.setTimestamp()
+			.setTitle(`Lecteur musical de __**${guild.name}**__`);
+
+		switch (this.audio._state.status) {
+			case 'idle':{
+				embed.setDescription('La playlist est vide')
+					.setThumbnail('https://imgur.com/RSc1nz1.png')
+					.setImage('https://imgur.com/13nB881.png');
+				break;
+			}
+			case 'playing':{
+				const metadata = this.player.queue[0].metadata;
+				embed.setDescription(`Joue actuellement **${metadata.title}** de **${metadata.author.name}**`)
+					.setThumbnail('https://imgur.com/cxC9flw.png')
+					.setImage('https://i.imgur.com/ayiVJSS.gif');
+				break;
+			}
+		}
+		return embed;
 	}
 }
 
@@ -64,43 +116,10 @@ async function GetAudioPlayer(client, guild) {
 }
 
 async function CreateAudioPlayer(client, guild, channel) {
-	const answer = await channel.send(`<a:loading:1051599264498851852> Création du lecteur pour **${guild.name}**`);
 	const player = new MusicPlayer(guild, channel);
 	client.MusicPlayers.push(player);
 	await new Promise((resolve) => setTimeout(resolve, 1000));
-	answer.edit(`<:Yes:1051950543997763748> Lecteur connecté à **${guild.name}**`);
 	return player;
 }
 
-function ShowPlayer(user, guild, player) {
-	const embed = new EmbedBuilder()
-		.setAuthor({
-			name: `${user.tag}`,
-			iconURL: user.avatarURL(),
-			url: `https://discordapp.com/users/${user.id}`,
-		})
-		.setURL('https://www.youtube.com')
-		.setColor('#4C59EB')
-		.setFooter({ text: 'Powered by Æstyo Corp.' })
-		.setTimestamp()
-		.setTitle(`Lecteur musical de __**${guild.name}**__`);
-
-	switch (player._state.status) {
-		case 'idle':{
-			embed.setDescription('La playlist est vide')
-				.setThumbnail('https://imgur.com/RSc1nz1.png')
-				.setImage('https://imgur.com/13nB881.png');
-			break;
-		}
-		case 'playing':{
-			const metadata = player.queue[0].metadata;
-			embed.setDescription(`Joue actuellement **${metadata.title}** de **${metadata.author.name}**`)
-				.setThumbnail('https://imgur.com/cxC9flw.png')
-				.setImage('https://i.imgur.com/ayiVJSS.gif');
-			break;
-		}
-	}
-	return embed;
-}
-
-module.exports = { MusicPlayer, GetAudioPlayer, CreateAudioPlayer, ShowPlayer };
+module.exports = { MusicPlayer, GetAudioPlayer, CreateAudioPlayer };
