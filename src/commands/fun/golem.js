@@ -35,7 +35,9 @@ module.exports = {
 			message.reply(`Impossible de récupérer l'utilisateur ${args[0]}`);
 			return;
 		}
+
 		const image = await GenerateGolem(target);
+
 		if (image == -1) {
 			message.reply('Erreur lors de la création du golem.');
 		}
@@ -71,9 +73,15 @@ async function GenerateGolem(user) {
 
 	const images = [`./media/golem/${golemId}.png`, `./cache/avatar_${user.tag}.png`];
 	const jimps = [];
-	images.forEach((img) => {
-		jimps.push(jimp.read(img));
-	});
+	try {
+		images.forEach((img) => {
+			jimps.push(jimp.read(img));
+		});
+	} catch (error) {
+		images.forEach((img) => {
+			jimps.push(jimp.read(img));
+		});
+	}
 	await Promise.all(jimps)
 		.then(function() {
 			return Promise.all(jimps);
