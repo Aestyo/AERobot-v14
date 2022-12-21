@@ -73,15 +73,9 @@ async function GenerateGolem(user) {
 
 	const images = [`./media/golem/${golemId}.png`, `./cache/avatar_${user.tag}.png`];
 	const jimps = [];
-	try {
-		images.forEach((img) => {
-			jimps.push(jimp.read(img));
-		});
-	} catch (error) {
-		images.forEach((img) => {
-			jimps.push(jimp.read(img));
-		});
-	}
+	images.forEach((img) => {
+		jimps.push(jimp.read(img));
+	});
 	await Promise.all(jimps)
 		.then(function() {
 			return Promise.all(jimps);
