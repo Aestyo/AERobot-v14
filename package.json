@@ -36,7 +36,6 @@
     "ping": "^0.4.2",
     "promisify": "^0.0.3",
     "sharp": "^0.31.2",
-    "webp-converter": "^2.3.3",
     "yt-search": "^2.10.3",
     "ytdl-core": "^4.11.2"
   },
