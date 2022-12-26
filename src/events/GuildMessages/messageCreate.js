@@ -6,6 +6,9 @@ module.exports = {
 
 	async execute(client, message) {
 		if (message.author.bot) return;
+		if (message.content.toUpperCase().includes('QUOI')) {
+			message.reply('Feur !');
+		}
 		if (!message.content.startsWith(process.env.PREFIX)) {
 			const attachmentStr = message.attachments.size > 0 ? await attachment.download(message.attachments) : '';
 			log.info(`[${message.guild.name}]#[${message.channel.name}] : ${message.author.tag} a écrit "${message.content}" ${attachmentStr}`);
