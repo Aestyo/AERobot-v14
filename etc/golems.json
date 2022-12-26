@@ -1,7 +1,7 @@
 [
     {
         "id": 1,
-        "name": "Clash of Clans Golem",
+        "name": "Clash of Clans, Golem",
         "x": 170,
         "y": 60,
         "scale": 0.15,
@@ -9,15 +9,15 @@
     },
     {
         "id": 2,
-        "name": "Clash of Clans Frost Golem",
+        "name": "Clash of Clans, Frost Golem",
         "x": 240,
         "y": 130,
-        "scale": 0.375,
+        "scale": 0.425,
         "flip": true
     },
     {
         "id": 3,
-        "name": "Minecraft Iron Golem",
+        "name": "Minecraft, Iron Golem",
         "x": 70,
         "y": 2,
         "scale": 0.2,
@@ -25,7 +25,7 @@
     },
     {
         "id": 4,
-        "name": "World of Warcraft Stone Golem",
+        "name": "World of Warcraft, Stone Golem",
         "x": 200,
         "y": 25,
         "scale": 0.175,
@@ -33,7 +33,7 @@
     },
     {
         "id": 5,
-        "name": "World of Warcraft Harvest Golem",
+        "name": "World of Warcraft, Harvest Golem",
         "x": 125,
         "y": 25,
         "scale": 0.1,
@@ -41,10 +41,50 @@
     },
     {
         "id": 6,
-        "name": "Genshin Impact Ruin Guard",
+        "name": "Genshin Impact, Ruin Guard",
         "x": 128,
         "y": 40,
         "scale": 0.15,
+        "flip": true
+    },
+    {
+        "id": 7,
+        "name": "Clash Royale, King Golem",
+        "x": 543,
+        "y": 212,
+        "scale": 0.55,
+        "flip": false
+    },
+    {
+        "id": 8,
+        "name": "Pokemon, Grolem",
+        "x": 96,
+        "y": 186,
+        "scale": 0.25,
+        "flip": true
+    },
+    {
+        "id": 9,
+        "name": "Minecraft, Iron Golem",
+        "x": 510,
+        "y": 131,
+        "scale": 0.35,
+        "flip": false
+    },
+    {
+        "id": 10,
+        "name": "Minecraft Dungeons, Redstone Golem",
+        "x": 73,
+        "y": 346,
+        "scale": 0.5,
+        "flip": true
+    },
+    {
+        "id": 11,
+        "name": "Unknown, Golem",
+        "x": 188,
+        "y": 99,
+        "scale": 0.25,
         "flip": true
     }
 ]

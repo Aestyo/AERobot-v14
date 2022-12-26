@@ -6,7 +6,12 @@ module.exports = {
 
 	async execute(client, message) {
 		if (message.author.bot) return;
-		if (message.content.toUpperCase().includes('QUOI')) {
+		if (message.content.toUpperCase().includes('QUOI') ||
+			message.content.toUpperCase().includes('KOI') ||
+			message.content.toUpperCase().includes('KOA') ||
+			message.content.toUpperCase().includes('KWA') ||
+			message.content.toUpperCase().includes('KOUA') ||
+			message.content.toUpperCase().includes('QUOUA')) {
 			message.reply('Feur !');
 		}
 		if (!message.content.startsWith(process.env.PREFIX)) {

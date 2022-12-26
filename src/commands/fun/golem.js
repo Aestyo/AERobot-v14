@@ -48,7 +48,7 @@ module.exports = {
 };
 
 async function GenerateGolem(user) {
-	const golemId = Math.floor(Math.random() * 6 + 1);
+	const golemId = Math.floor(Math.random() * 11 + 1);
 	let x, y, scale, flip;
 
 	fs.readFile('./etc/golems.json', 'utf8', (err, jsonString) => {
@@ -81,6 +81,7 @@ async function GenerateGolem(user) {
 			return Promise.all(jimps);
 		})
 		.then(async function(data) {
+			await data[1].resize(450, 450);
 			await data[1].scale(scale);
 			await data[1].flip(flip, false);
 			await data[0].composite(data[1], x, y);
